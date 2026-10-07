@@ -1,10 +1,8 @@
 function Home() {
   return (
-    <>
-      <div>
-        <div></div>
-      </div>
-    </>
+    <main className="page">
+      <div className="glow" />
+    </main>
   );
 }
 
