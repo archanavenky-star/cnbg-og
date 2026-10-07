@@ -2,7 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import "@videojs/react/video/compat-skin.css";
 import { VideoPlayer, CompatVideoSkin } from "@videojs/react/video";
 import { YouTubeVideo } from "@videojs/react/media/youtube-video";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 
 interface Card {
   question: string;
@@ -25,15 +25,7 @@ function VideoSlide({ slide }: { slide: string }) {
 function Cards() {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
-  const [open, setOpen] = useState(false);
   const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (open && dialog && !dialog.open) {
-      dialog.showModal();
-    }
-  }, [open]);
 
   const CARDS: Record<string, Card> = {
     Ab12Cd34: {
@@ -123,7 +115,7 @@ function Cards() {
               className="code-row"
               type="button"
               aria-label="Open recording from the Gurukula"
-              onClick={() => setOpen(true)}
+              onClick={() => dialogRef.current?.showModal()}
             >
               <span className="code-label">
                 a recording from
@@ -139,7 +131,6 @@ function Cards() {
         ref={dialogRef}
         className="video-modal"
         aria-labelledby="video-modal-title"
-        onClose={() => setOpen(false)}
         onClick={(event) => {
           if (event.target === dialogRef.current) {
             dialogRef.current?.close();
@@ -154,17 +145,15 @@ function Cards() {
               type="button"
               aria-label="Close video"
               onClick={() => dialogRef.current?.close()}
-            >
-            </button>
+            ></button>
           </div>
-          {open &&
-            (card.url ? (
-              <VideoSlide slide={card.url} />
-            ) : (
-              <p className="video-unavailable">
-                A recording for this question is not available yet.
-              </p>
-            ))}
+          {card.url ? (
+            <VideoSlide slide={card.url} />
+          ) : (
+            <p className="video-unavailable">
+              A recording for this question is not available yet.
+            </p>
+          )}
         </div>
       </dialog>
     </>
