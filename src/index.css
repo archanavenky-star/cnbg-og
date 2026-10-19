@@ -10,6 +10,9 @@
   --navy: #1b2a4a;
   --cream: #f2efe6;
   --gold: #c9973f;
+  --gallery-ink: #202a35;
+  --gallery-muted: #737a80;
+  --gallery-line: rgba(32, 42, 53, 0.15);
   --border-radius: 0.25rem;
   --font-display: "Source Serif 4", Georgia, serif;
   --font-ui: "Jost", "Helvetica Neue", sans-serif;

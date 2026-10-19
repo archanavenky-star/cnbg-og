@@ -1,11 +1,12 @@
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
-import './App.css'
-import Home from './pages/home';
-import About from './pages/about';
-import Cards from './pages/cards';
+import { BrowserRouter, Link, Route, Routes } from "react-router-dom";
+import "./App.css";
+import Home from "./pages/home";
+import About from "./pages/about";
+import Cards from "./pages/cards";
+import VideoGallery from "./pages/gallery/VideoGallery";
 
 function App() {
- return (
+  return (
     <BrowserRouter>
       <div className="app-shell">
         <nav>
@@ -17,10 +18,11 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/about" element={<About />} />
           <Route path="/cards" element={<Cards />} />
+          <Route path="/gallery" element={<VideoGallery />} />
         </Routes>
       </div>
     </BrowserRouter>
   );
 }
 
-export default App
+export default App;
