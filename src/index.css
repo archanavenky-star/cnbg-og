@@ -174,6 +174,50 @@ img {
   font-weight: 600;
 }
 
+.answer a {
+  position: relative;
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--gold);
+  text-underline-offset: 4px;
+  transition: color 180ms ease;
+}
+
+.answer a:hover {
+  color: #88601f;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+.answer a:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+.answer a[href^="http://"]::before,
+.answer a[href^="https://"]::before {
+  content: "↗";
+  color: var(--gold);
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  top: 0%;
+  right: 0%;
+  /* border-top: 2px solid var(--gold);
+  border-right: 2px solid var(--gold); */
+  transform: translate(200%, -25%);
+}
+
+.answer ul {
+  padding-left: 0;
+  list-style-position: inside;
+}
+
+.answer p,
+.answer ul {
+  margin: 0 0 0.65rem;
+}
+
 .code-row {
   display: block;
   width: 100%;
@@ -211,6 +255,7 @@ img {
   margin: auto;
   padding: clamp(1rem, 3vw, 2rem);
   overflow: auto;
+  overscroll-behavior: contain;
   border: 1px solid rgb(201 151 63 / 65%);
   border-radius: var(--border-radius);
   background: var(--cream);
@@ -253,6 +298,7 @@ img {
 .video-modal-content {
   display: grid;
   gap: 1.25rem;
+  min-width: 0;
 }
 
 .video-modal-heading {
@@ -303,7 +349,6 @@ img {
 }
 
 .video-slide {
-  width: 100%;
   overflow: hidden;
   border-radius: var(--border-radius);
   background: #101010;
