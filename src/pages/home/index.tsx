@@ -115,7 +115,7 @@ function Home() {
             <article className="home-initiative">
               <p>
                 Free sessions are offered online (
-                <strong>OLA –Open Learning for All)</strong> frequently, with
+                <strong>OLA - Open Learning for All)</strong> frequently, with
                 bhajans, chanting and even music being taught to registered
                 participants.
               </p>

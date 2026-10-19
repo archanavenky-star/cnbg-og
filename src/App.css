@@ -6,6 +6,26 @@
   width: 100%;
 }
 
+.listening-post-frame {
+  display: block;
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  border: 0;
+  background: #12123a;
+}
+
+.listening-post-video {
+  display: block;
+  width: 100%;
+  height: 100dvh;
+  max-height: 100dvh;
+  background: #000;
+  object-fit: contain;
+}
+
 .counter {
   font-size: 16px;
   padding: 5px 10px;
