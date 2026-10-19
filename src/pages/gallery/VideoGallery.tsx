@@ -1,4 +1,5 @@
-import { useRef, useState } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { type TouchEvent, useEffect, useRef, useState } from "react";
 import "@videojs/react/video/compat-skin.css";
 import { VideoPlayer, CompatVideoSkin } from "@videojs/react/video";
 import { YouTubeVideo } from "@videojs/react/media/youtube-video";
@@ -200,24 +201,109 @@ function VideoSlide({ slide }: { slide: string }) {
 }
 
 export default function VideoGallery() {
+  const shouldReduceMotion = useReducedMotion();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const [activeVideo, setActiveVideo] = useState<GalleryVideo | null>(null);
+  const navRef = useRef<HTMLElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const [activeVideoIndex, setActiveVideoIndex] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [navigationDirection, setNavigationDirection] = useState<1 | -1>(1);
+  const [activeCategory, setActiveCategory] = useState(Object.keys(gallery)[0]);
+  const previousCategory = useRef(activeCategory);
+  const activeVideos = gallery[activeCategory] ?? [];
+  const activeVideo =
+    activeVideoIndex === null ? null : (activeVideos[activeVideoIndex] ?? null);
+
+  useEffect(() => {
+    if (!isModalOpen) return;
+
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollY = window.scrollY;
+    const previousBodyStyles = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+    const previousScrollBehavior = html.style.scrollBehavior;
+
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+
+    return () => {
+      Object.assign(body.style, previousBodyStyles);
+      html.style.scrollBehavior = "auto";
+      window.scrollTo(0, scrollY);
+      html.style.scrollBehavior = previousScrollBehavior;
+    };
+  }, [isModalOpen]);
+
+  useEffect(() => {
+    if (previousCategory.current === activeCategory) return;
+    previousCategory.current = activeCategory;
+    const section = sectionRef.current;
+    if (!section) return;
+
+    const navHeight = navRef.current?.getBoundingClientRect().height ?? 0;
+    const sectionMargin = Number.parseFloat(
+      getComputedStyle(section).scrollMarginTop,
+    );
+    section.style.scrollMarginTop = `${navHeight + sectionMargin}px`;
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeCategory]);
 
   const openVideo = (video: GalleryVideo) => {
-    setActiveVideo(video);
+    setActiveVideoIndex(activeVideos.indexOf(video));
+    setIsModalOpen(true);
     dialogRef.current?.showModal();
+  };
+
+  const navigateVideo = (direction: 1 | -1) => {
+    if (activeVideos.length < 2) return;
+    setNavigationDirection(direction);
+    setActiveVideoIndex((currentIndex) => {
+      if (currentIndex === null) return currentIndex;
+      return (
+        (currentIndex + direction + activeVideos.length) % activeVideos.length
+      );
+    });
+  };
+
+  const handleTouchStart = (event: TouchEvent<HTMLDivElement>) => {
+    if ((event.target as HTMLElement).closest("button")) return;
+    touchStartX.current = event.touches[0]?.clientX ?? null;
+  };
+
+  const handleTouchEnd = (event: TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartX.current;
+    const endX = event.changedTouches[0]?.clientX;
+    touchStartX.current = null;
+    if (startX === null || endX === undefined) return;
+
+    const distance = endX - startX;
+    if (Math.abs(distance) < 60) return;
+    navigateVideo(distance < 0 ? 1 : -1);
   };
 
   const closeVideo = () => {
     dialogRef.current?.close();
-    setActiveVideo(null);
+    setActiveVideoIndex(null);
+    setIsModalOpen(false);
   };
 
   return (
     <>
       <div className="page">
         <div className="glow" />
-        <div className="gallery-card">
+        <div className="card">
           <header className="gallery-header">
             <p className="gallery-eyebrow">NBF · THE ARCHIVE</p>
             <h1>Naada Bindu Festival over the Years</h1>
@@ -227,86 +313,137 @@ export default function VideoGallery() {
             </p>
           </header>
 
-          <nav className="gallery-nav" aria-label="Gallery categories">
+          <nav
+            ref={navRef}
+            className="gallery-nav"
+            aria-label="Gallery categories"
+          >
             {Object.keys(gallery).map((category) => (
-              <a key={category} href={`#${category.toLowerCase()}`}>
+              <button
+                key={category}
+                type="button"
+                aria-pressed={activeCategory === category}
+                onClick={() => setActiveCategory(category)}
+              >
                 {category}
                 <span>
                   {gallery[category].length.toString().padStart(2, "0")}
                 </span>
-              </a>
+              </button>
             ))}
           </nav>
 
-          {Object.entries(gallery).map(([category, videos]) => (
-            <section
-              className="gallery-section"
-              id={category.toLowerCase()}
-              key={category}
-              aria-labelledby={`${category.toLowerCase()}-heading`}
-            >
-              <div className="section-heading">
-                <div>
-                  <p className="gallery-eyebrow">COLLECTION</p>
-                  <h2 id={`${category.toLowerCase()}-heading`}>{category}</h2>
+          {Object.entries(gallery)
+            .filter(([category]) => category === activeCategory)
+            .map(([category, videos]) => (
+              <section
+                ref={sectionRef}
+                className="gallery-section"
+                key={category}
+                aria-labelledby={`${category.toLowerCase()}-heading`}
+              >
+                <div className="section-heading">
+                  <div>
+                    <p className="gallery-eyebrow">COLLECTION</p>
+                    <h2 id={`${category.toLowerCase()}-heading`}>{category}</h2>
+                  </div>
+                  <span className="section-count">
+                    {videos.length.toString().padStart(2, "0")} recordings
+                  </span>
                 </div>
-                <span className="section-count">
-                  {videos.length.toString().padStart(2, "0")} recordings
-                </span>
-              </div>
 
-              <div className="video-grid">
-                {videos.map((video, index) => {
-                  const videoId = getYouTubeId(video.url);
-                  return (
-                    <button
-                      className="video-card"
-                      key={`${video.url}-${index}`}
-                      type="button"
-                      onClick={() => openVideo(video)}
-                      aria-label={`Play ${video.title}`}
-                    >
-                      <span className="video-card-image">
-                        {videoId ? (
-                          <img
-                            src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
-                            alt=""
-                            loading="lazy"
-                          />
-                        ) : (
-                          <span className="thumbnail-fallback">NBF</span>
-                        )}
-                        <span className="play-button" aria-hidden="true">
-                          <svg viewBox="0 0 24 24" focusable="false">
-                            <path d="M8 5.5v13l10-6.5z" />
-                          </svg>
+                <div className="video-grid">
+                  {videos.map((video, index) => {
+                    const videoId = getYouTubeId(video.url);
+                    return (
+                      <button
+                        className="video-card"
+                        key={`${video.url}-${index}`}
+                        type="button"
+                        onClick={() => openVideo(video)}
+                        aria-label={`Play ${video.title}`}
+                      >
+                        <span className="video-card-image">
+                          {videoId ? (
+                            <img
+                              src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+                              alt=""
+                              loading="lazy"
+                            />
+                          ) : (
+                            <span className="thumbnail-fallback">NBF</span>
+                          )}
+                          <span className="play-button" aria-hidden="true">
+                            <svg viewBox="0 0 24 24" focusable="false">
+                              <path d="M8 5.5v13l10-6.5z" />
+                            </svg>
+                          </span>
+                          {video.year && (
+                            <span className="video-year">{video.year}</span>
+                          )}
                         </span>
-                        {video.year && (
-                          <span className="video-year">{video.year}</span>
-                        )}
-                      </span>
-                      <span className="video-card-copy">
-                        <span className="video-card-category">{category}</span>
-                        <span className="video-card-title">{video.title}</span>
-                      </span>
-                      <span className="video-card-action">Watch recording</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
+                        <span className="video-card-copy">
+                          <span className="video-card-category">
+                            {category}
+                          </span>
+                          <span className="video-card-title">
+                            {video.title}
+                          </span>
+                        </span>
+                        <span className="video-card-action">
+                          Watch recording
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+            ))}
 
           <dialog
             ref={dialogRef}
             className="video-modal"
             aria-labelledby="video-modal-title"
-            onClose={() => setActiveVideo(null)}
+            onClose={() => {
+              setActiveVideoIndex(null);
+              setIsModalOpen(false);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowLeft") {
+                event.preventDefault();
+                navigateVideo(-1);
+              } else if (event.key === "ArrowRight") {
+                event.preventDefault();
+                navigateVideo(1);
+              }
+            }}
             onClick={(event) => {
               if (event.target === dialogRef.current) closeVideo();
             }}
           >
-            <div className="video-modal-content">
+            {activeVideo && activeVideos.length > 1 && (
+              <div className="video-modal-controls">
+                <button
+                  className="video-modal-nav video-modal-nav--previous"
+                  type="button"
+                  aria-label="Previous recording"
+                  title="Previous recording (Left Arrow)"
+                  onClick={() => navigateVideo(-1)}
+                />
+                <button
+                  className="video-modal-nav video-modal-nav--next"
+                  type="button"
+                  aria-label="Next recording"
+                  title="Next recording (Right Arrow)"
+                  onClick={() => navigateVideo(1)}
+                />
+              </div>
+            )}
+            <div
+              className="video-modal-content"
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
               <div className="video-modal-heading">
                 <div>
                   <p className="gallery-eyebrow">
@@ -315,6 +452,11 @@ export default function VideoGallery() {
                   <h2 id="video-modal-title">
                     {activeVideo?.title ?? "A recording from the Gurukula"}
                   </h2>
+                  {activeVideo && (
+                    <span className="video-modal-count">
+                      {(activeVideoIndex ?? 0) + 1} / {activeVideos.length}
+                    </span>
+                  )}
                 </div>
                 <button
                   className="video-modal-close"
@@ -326,7 +468,27 @@ export default function VideoGallery() {
                 </button>
               </div>
               {activeVideo ? (
-                <VideoSlide slide={activeVideo.url} />
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.div
+                    key={activeVideo.url}
+                    className="video-slide-transition"
+                    initial={{
+                      opacity: 0,
+                      x: shouldReduceMotion ? 0 : navigationDirection * 36,
+                    }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{
+                      opacity: 0,
+                      x: shouldReduceMotion ? 0 : navigationDirection * -36,
+                    }}
+                    transition={{
+                      duration: shouldReduceMotion ? 0 : 0.22,
+                      ease: "easeOut",
+                    }}
+                  >
+                    <VideoSlide slide={activeVideo.url} />
+                  </motion.div>
+                </AnimatePresence>
               ) : (
                 <p className="video-unavailable">
                   A recording for this question is not available yet.
