@@ -2,7 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import "@videojs/react/video/compat-skin.css";
 import { VideoPlayer, CompatVideoSkin } from "@videojs/react/video";
 import { YouTubeVideo } from "@videojs/react/media/youtube-video";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface Card {
   question: string;
@@ -21,10 +21,17 @@ function VideoSlide({ slide }: { slide: string }) {
 }
 
 function Cards() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const id = searchParams.get("id");
   const dialogRef = useRef<HTMLDialogElement>(null);
+  const previousId = useRef(id);
   // const [isVideoOpen, setIsVideoOpen] = useState(false);
+
+  useEffect(() => {
+    if (previousId.current === id) return;
+    previousId.current = id;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [id]);
 
   const CARDS: Record<string, Card> = {
     k7Qm2v9R: {
@@ -850,8 +857,32 @@ function Cards() {
     },
   };
 
+  const navigableCards = Object.entries(CARDS).filter(
+    ([, entry]) => entry.question.trim().length > 0,
+  );
+  const currentCardIndex = navigableCards.findIndex(
+    ([cardId]) => cardId === id,
+  );
+  const previousCard =
+    currentCardIndex < 0 || navigableCards.length < 2
+      ? null
+      : navigableCards[
+          (currentCardIndex - 1 + navigableCards.length) % navigableCards.length
+        ];
+  const nextCard =
+    currentCardIndex < 0 || navigableCards.length < 2
+      ? null
+      : navigableCards[(currentCardIndex + 1) % navigableCards.length];
   const card = id ? CARDS[id] : undefined;
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
+
+  const navigateToCard = (cardId: string) => {
+    setSearchParams((currentParams) => {
+      const nextParams = new URLSearchParams(currentParams);
+      nextParams.set("id", cardId);
+      return nextParams;
+    });
+  };
 
   const handleRestClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.target;
@@ -926,6 +957,30 @@ function Cards() {
               </span>
             </button> */}
           </div>
+          {previousCard && nextCard && (
+            <div className="card-navigation" role="group" aria-label="Browse questions">
+              <button
+                className="card-navigation-button"
+                type="button"
+                onClick={() => navigateToCard(previousCard[0])}
+              >
+                <span className="card-navigation-direction">Previous question</span>
+                <span className="card-navigation-question">
+                  {previousCard[1].question}
+                </span>
+              </button>
+              <button
+                className="card-navigation-button card-navigation-button-next"
+                type="button"
+                onClick={() => navigateToCard(nextCard[0])}
+              >
+                <span className="card-navigation-direction">Next question</span>
+                <span className="card-navigation-question">
+                  {nextCard[1].question}
+                </span>
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
