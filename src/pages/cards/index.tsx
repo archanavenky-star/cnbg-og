@@ -2,6 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import "@videojs/react/video/compat-skin.css";
 import { VideoPlayer, CompatVideoSkin } from "@videojs/react/video";
 import { YouTubeVideo } from "@videojs/react/media/youtube-video";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
 interface Card {
@@ -23,6 +24,7 @@ function VideoSlide({ slide }: { slide: string }) {
 function Cards() {
   const [searchParams, setSearchParams] = useSearchParams();
   const id = searchParams.get("id");
+  const shouldReduceMotion = useReducedMotion();
   const dialogRef = useRef<HTMLDialogElement>(null);
   const previousId = useRef(id);
   // const [isVideoOpen, setIsVideoOpen] = useState(false);
@@ -172,7 +174,7 @@ function Cards() {
           <ul className="kalayoga-links">
             <li>
               <a
-                href="https://drive.google.com/file/d/1Ser0g8SVsCka01fDx6DctgSL7xFmUWQr/view?usp=drive_link"
+                href="https://youtu.be/gjXiF2lEc84"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -181,7 +183,7 @@ function Cards() {
             </li>
             <li>
               <a
-                href="https://drive.google.com/file/d/1HNnGxQ4nJcQud63ziJw6wbtuKD93WLJT/view?usp=drive_link"
+                href="https://youtu.be/fC4vprQV3pA"
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -218,7 +220,7 @@ function Cards() {
 
           <p>
             <a
-              href="https://drive.google.com/file/d/14oZG0G23J0AGiojRO1RPKTgSNWM0Br_w/view?usp=drive_link"
+              href="https://youtu.be/MJ_vuRsTFuo"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -313,7 +315,7 @@ function Cards() {
 
           <p>
             <a
-              href="https://drive.google.com/file/d/1nSNIVlXWueNlF0sQKrL5PU9lLYln1IW_/view?usp=drive_link"
+              href="https://youtu.be/GT2NL8iyfiA"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -327,7 +329,7 @@ function Cards() {
 
           <p>
             <a
-              href="https://drive.google.com/file/d/1HvTePEdN0ebByF4EGsrSJufdbc69e9JK/view?usp=drive_link"
+              href="https://youtu.be/iB-OjZMKCZg"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -433,7 +435,7 @@ function Cards() {
 
           <p>
             <a
-              href="https://drive.google.com/file/d/105maExjmiR_RhRnlav5MYFcXy0efGDrk/view?usp=drive_link"
+              href="https://youtube.com/shorts/3VwOKM6onn8?feature=share"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -579,6 +581,20 @@ function Cards() {
             social media, kindly contact the office on email (
             <a href="mailto:nbf@cvv.ac.in">nbf@cvv.ac.in</a>) or phone (
             <a href="tel:+917720839000">77208 39000</a>).
+          </p>
+
+          <p>
+            <b>Watch an opening of one of the NBFs here:</b>
+          </p>
+
+          <p>
+            <a
+              href="https://youtube.com/shorts/rMS2oz1yKV0?si=DQgWDF2U7Qr0qGgC"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Watch the Video
+            </a>
           </p>
         </div>
       ),
@@ -729,7 +745,7 @@ function Cards() {
           </p>
           <p>
             <a
-              href="https://drive.google.com/file/d/1OjCeB6hkWF7pmXBZjuGRX6DcgEStnBVw/view?usp=drive_link"
+              href="https://youtu.be/gO7iB0vjkgI"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -821,7 +837,7 @@ function Cards() {
 
           <p>
             <a
-              href="https://drive.google.com/file/d/1HNnGxQ4nJcQud63ziJw6wbtuKD93WLJT/view?usp=drive_link"
+              href="https://youtu.be/fC4vprQV3pA"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -835,7 +851,7 @@ function Cards() {
 
           <p>
             <a
-              href="https://drive.google.com/file/d/14oZG0G23J0AGiojRO1RPKTgSNWM0Br_w/view?usp=drive_link"
+              href="https://youtu.be/MJ_vuRsTFuo"
               target="_blank"
               rel="noopener noreferrer"
             >
@@ -876,6 +892,37 @@ function Cards() {
   const card = id ? CARDS[id] : undefined;
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
 
+  useEffect(() => {
+    if (!activeVideo) return;
+
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollY = window.scrollY;
+    const previousBodyStyles = {
+      position: body.style.position,
+      top: body.style.top,
+      left: body.style.left,
+      right: body.style.right,
+      width: body.style.width,
+      overflow: body.style.overflow,
+    };
+    const previousScrollBehavior = html.style.scrollBehavior;
+
+    body.style.position = "fixed";
+    body.style.top = `-${scrollY}px`;
+    body.style.left = "0";
+    body.style.right = "0";
+    body.style.width = "100%";
+    body.style.overflow = "hidden";
+
+    return () => {
+      Object.assign(body.style, previousBodyStyles);
+      html.style.scrollBehavior = "auto";
+      window.scrollTo(0, scrollY);
+      html.style.scrollBehavior = previousScrollBehavior;
+    };
+  }, [activeVideo]);
+
   const navigateToCard = (cardId: string) => {
     setSearchParams((currentParams) => {
       const nextParams = new URLSearchParams(currentParams);
@@ -913,76 +960,107 @@ function Cards() {
     }
   };
 
-  if (!card) {
-    return (
-      <div className="page">
-        <div className="glow" />
-        <div className="card-blank">
-          <div className="face">
-            <div className="question">Bindu</div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <>
-      <div className="page">
-        <div className="glow" />
-        <div className="card">
-          <div className="face">
-            <div className="question">{card.question}</div>
-            <div className="answer">
-              {card.rest && (
-                <div className="answer-rest" onClick={handleRestClick}>
-                  {card.rest}
+      <AnimatePresence mode="wait" initial={false}>
+        <motion.div
+          key={card ? id : "question-picker"}
+          className="cards-page-transition"
+          initial={{ opacity: 0, y: shouldReduceMotion ? 0 : 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -8 }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.24,
+            ease: "easeOut",
+          }}
+        >
+          {!card ? (
+            <div className="page">
+              <div className="glow" />
+              <div className="question-picker">
+                <h1 className="question-picker-title">Bindu</h1>
+                <h2 className="question-picker-sub-title">Question Cards</h2>
+                <div className="question-grid" aria-label="All questions">
+                  {navigableCards.map(([cardId, entry]) => (
+                    <button
+                      className="question-grid-item"
+                      key={cardId}
+                      type="button"
+                      onClick={() => navigateToCard(cardId)}
+                    >
+                      {entry.question}
+                    </button>
+                  ))}
                 </div>
-              )}
+              </div>
             </div>
-            <div className="rule" />
-            {/* <button
-              className="code-row"
-              type="button"
-              aria-label="Open recording from the Gurukula"
-              onClick={() => {
-                // setIsVideoOpen(true);
-                dialogRef.current?.showModal();
-              }}
-            >
-              <span className="code-label">
-                a recording from
-                <br />
-                the Gurukula
-              </span>
-            </button> */}
-          </div>
-          {previousCard && nextCard && (
-            <div className="card-navigation" role="group" aria-label="Browse questions">
-              <button
-                className="card-navigation-button"
-                type="button"
-                onClick={() => navigateToCard(previousCard[0])}
-              >
-                <span className="card-navigation-direction">Previous question</span>
-                <span className="card-navigation-question">
-                  {previousCard[1].question}
-                </span>
-              </button>
-              <button
-                className="card-navigation-button card-navigation-button-next"
-                type="button"
-                onClick={() => navigateToCard(nextCard[0])}
-              >
-                <span className="card-navigation-direction">Next question</span>
-                <span className="card-navigation-question">
-                  {nextCard[1].question}
-                </span>
-              </button>
+          ) : (
+            <div className="page">
+              <div className="glow" />
+              <div className="card">
+                <div className="face">
+                  <div className="question">{card.question}</div>
+                  <div className="answer">
+                    {card.rest && (
+                      <div className="answer-rest" onClick={handleRestClick}>
+                        {card.rest}
+                      </div>
+                    )}
+                  </div>
+                  <div className="rule" />
+                  {/* <button
+                    className="code-row"
+                    type="button"
+                    aria-label="Open recording from the Gurukula"
+                    onClick={() => {
+                      // setIsVideoOpen(true);
+                      dialogRef.current?.showModal();
+                    }}
+                  >
+                    <span className="code-label">
+                      a recording from
+                      <br />
+                      the Gurukula
+                    </span>
+                  </button> */}
+                </div>
+                {previousCard && nextCard && (
+                  <div
+                    className="card-navigation"
+                    role="group"
+                    aria-label="Browse questions"
+                  >
+                    <button
+                      className="card-navigation-button"
+                      type="button"
+                      onClick={() => navigateToCard(previousCard[0])}
+                    >
+                      <span className="card-navigation-direction">
+                        Previous question
+                      </span>
+                      <span className="card-navigation-question">
+                        {previousCard[1].question}
+                      </span>
+                    </button>
+                    <button
+                      className="card-navigation-button card-navigation-button-next"
+                      type="button"
+                      onClick={() => navigateToCard(nextCard[0])}
+                    >
+                      <span className="card-navigation-direction">
+                        Next question
+                      </span>
+                      <span className="card-navigation-question">
+                        {nextCard[1].question}
+                      </span>
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
 
       <dialog
         ref={dialogRef}
