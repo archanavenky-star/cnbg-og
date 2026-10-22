@@ -1,5 +1,11 @@
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { BrowserRouter, Link, Route, Routes, useLocation } from "react-router-dom";
+import {
+  BrowserRouter,
+  Link,
+  Route,
+  Routes,
+  useLocation,
+} from "react-router-dom";
 import "./App.css";
 import bansuriListeningPost from "./assets/naada_bansuri_listening_post.html?url";
 import dinacharyaListeningPost from "./assets/naada_dinacharya_listening_post.mp4?url";
@@ -9,11 +15,11 @@ import Home from "./pages/home";
 // import About from "./pages/about";
 import Cards from "./pages/cards";
 import VideoGallery from "./pages/gallery/VideoGallery";
+const chinmayaLogo = "/CHINMAYA_Logo.png";
+const cnbgLogo = "/CNBG_Logo.png";
 
 function ListeningPost({ src, title }: { src: string; title: string }) {
-  return (
-    <iframe className="listening-post-frame" src={src} title={title} />
-  );
+  return <iframe className="listening-post-frame" src={src} title={title} />;
 }
 
 function AnimatedRoutes() {
@@ -88,8 +94,16 @@ function AppNavigation() {
 
   return (
     <nav>
-      <Link to="/">Home</Link>
-      <Link to="/gallery">Gallery</Link>
+      <div className="nav-logo">
+        <img src={chinmayaLogo} alt="Chinmaya Logo" />
+      </div>
+      <div className="navigation">
+        <Link to="/">Home</Link>
+        <Link to="/gallery">Gallery</Link>
+      </div>
+      <div className="nav-logo">
+        <img src={cnbgLogo} alt="Chinmaya Logo" />
+      </div>
     </nav>
   );
 }

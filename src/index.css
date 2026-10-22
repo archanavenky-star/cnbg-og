@@ -59,15 +59,41 @@ body {
 nav {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  min-height: 4.5rem;
+  padding: 0 clamp(2rem, 6vw, 5rem);
+  border-bottom: 1px solid rgb(242 239 230 / 16%);
+}
+
+.navigation {
+  display: flex;
+  align-items: center;
   justify-content: center;
   gap: clamp(1.5rem, 5vw, 4rem);
-  min-height: 4.5rem;
   padding: 0.75rem 1.5rem;
-  border-bottom: 1px solid rgb(242 239 230 / 16%);
   font-family: var(--font-ui);
   font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(4rem, 5vw, 6rem);
+  padding: 0.5rem;
+  margin: 0.5rem 0;
+  background-color: var(--cream);
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+}
+
+.nav-logo img {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
 }
 
 nav a {
